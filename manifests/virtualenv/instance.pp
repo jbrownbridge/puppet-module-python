@@ -44,16 +44,23 @@ define python::virtualenv::instance($python=$python::virtualenv::python,
             # Don't run this command if this file exists
             creates => "$virtualenv/bin/pip",
             require => [
-                          File[$virtualenv],
-                          Package["python-virtualenv"]
-                       ],
+                File[$virtualenv],
+                Package["python-virtualenv"]
+            ],
+        }
+        
+        file { $cache_dir:
+            ensure    => directory,
+            owner     => owner,
+            directory => directory,
         }
 
         # Some newer Python packages require an updated distribute
         # from the one that is in repos on most systems:
         exec { "update distribute and pip in $virtualenv":
-            command => "$virtualenv/bin/pip install --download-cache=$cache_dir -U distribute pip",
+            command     => "$virtualenv/bin/pip install --download-cache=$cache_dir -U distribute pip",
             refreshonly => true,
+            require     => File[$cache_dir],
         }
 
         if $requirements {
@@ -65,6 +72,7 @@ define python::virtualenv::instance($python=$python::virtualenv::python,
                 group => $group,
                 cache_dir => $cache_dir,
                 require => [
+                    File[$cache_dir],
          #           Exec["python::virtualenv $virtualenv"],
                 ]
             }
@@ -84,6 +92,7 @@ define python::virtualenv::instance($python=$python::virtualenv::python,
                 group => $group,
                 cache_dir => $cache_dir,
                 require => [
+                    File[$cache_dir],
                     Exec["python:virtualenv $virtualenv"],
                 ],
             }

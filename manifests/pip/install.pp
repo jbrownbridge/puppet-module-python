@@ -17,25 +17,39 @@ define python::pip::install($package,
         cwd => "/tmp",
     }
 
+    file { $cache_dir:
+        ensure => directory,
+        owner  => $owner,
+        group  => $group,
+    }
+
     if $ensure == 'present' {
         exec { "pip install $name":
             command => "$virtualenv/bin/pip install --download-cache=$cache_dir $package",
-            require => [Class["packages::python"],
-                        Package["python-virtualenv"]],
-            unless => "$virtualenv/bin/pip freeze | grep -e $grep_regex"
+            require => [
+                File[$cache_dir],
+                Class["packages::python"],
+                Package["python-virtualenv"],
+            ],
+            unless  => "$virtualenv/bin/pip freeze | grep -e $grep_regex"
         }
     } elsif $ensure == 'latest' {
         exec { "pip install $name":
             command => "$virtualenv/bin/pip install --download-cache=$cache_dir -U $package",
-            require => [Class["packages::python"],
-                        Package["python-virtualenv"]],
+            require => [
+                File[$cache_dir],
+                Class["packages::python"],
+                Package["python-virtualenv"],
+            ],
         }
     } elsif $ensure == 'absent' {
         exec { "pip install $name":
             command => "$virtualenv/bin/pip uninstall $package",
-            require => [Class["packages::python"],
-                        Package["python-virtualenv"]],
-            onlyif => "$virtualenv/bin/pip freeze | grep -e $grep_regex"
+            require => [
+                Class["packages::python"],
+                Package["python-virtualenv"],
+            ],
+            onlyif  => "$virtualenv/bin/pip freeze | grep -e $grep_regex"
         }
     }
 }
