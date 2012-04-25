@@ -51,8 +51,7 @@ define python::virtualenv::instance($python=$python::virtualenv::python,
         
         file { $cache_dir:
             ensure    => directory,
-            owner     => owner,
-            directory => directory,
+            owner     => $owner,
         }
 
         # Some newer Python packages require an updated distribute
