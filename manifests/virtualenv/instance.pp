@@ -49,9 +49,7 @@ define python::virtualenv::instance($python=$python::virtualenv::python,
             ],
         }
        
-        if defined(File[$cache_dir]) {
-            notice("File[${cache_dir}] already exists")
-        } else
+        if !defined(File[$cache_dir]) {
             file { $cache_dir:
                 ensure    => directory,
                 owner     => $owner,
