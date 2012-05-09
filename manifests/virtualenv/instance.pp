@@ -48,10 +48,14 @@ define python::virtualenv::instance($python=$python::virtualenv::python,
                 Package["python-virtualenv"]
             ],
         }
-        
-        file { $cache_dir:
-            ensure    => directory,
-            owner     => $owner,
+       
+        if defined(File[$cache_dir]) {
+            notice("File[${cache_dir}] already exists")
+        } else
+            file { $cache_dir:
+                ensure    => directory,
+                owner     => $owner,
+            }
         }
 
         # Some newer Python packages require an updated distribute
